@@ -22,4 +22,4 @@ node *factor(char* p, int l, int r);
 /* clean up */
 void delete_tree(node** p);
 
-#endif // EXPRESSIONS_H_
+#endif 

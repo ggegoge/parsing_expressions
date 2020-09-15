@@ -8,7 +8,8 @@
 /* string p w indeksach od l do r zmienia w int */
 int stoi(char* p, int l, int r) {
   int res = 0;
-  for (int i=l; i<r; i++) {
+  int i;
+  for (i=l; i<r; i++) {
     res *= 10;
     res += p[i] - '0';
   }
