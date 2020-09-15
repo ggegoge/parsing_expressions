@@ -12,7 +12,7 @@ everything is parsed according to this simplified (im no bnf expert but [consult
 ```grammar
 <expression> ::= <term> { + <term> }
 <term> ::= <factor> { * <factor> }
-<factor> ::=  <number> | ( <expression> ) }
+<factor> ::=  <number> | ( <expression> ) 
 ```
 of course the `+` could also be a `-` and the `*` could be `/` too. They are the same operation after all (but reversed).
  
