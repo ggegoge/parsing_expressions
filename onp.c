@@ -67,22 +67,22 @@ void onp(node* p) {
 void normalna(node* p) {
   if (p != NULL) {               /* rekur left, do, rekur right */
     if (p->l != NULL) { 
-      if ((p->l)->op == '+')
+      if (((p->l)->op == '+') || ((p->l)->op == '-'))
         printf("( ");
     }
     normalna(p->l);
     if (p->l != NULL) {
-      if ((p->l)->op == '+')
+      if (((p->l)->op == '+') || ((p->l)->op == '-'))
         printf(") ");
     }
     printf("%c ", p->op);
     if (p->r != NULL) {
-      if ((p->r)->op == '+')
+      if (((p->r)->op == '+') || ((p->r)->op == '-'))
         printf("( ");
     }
     normalna(p->r);
     if (p->r != NULL) {
-      if ((p->r)->op == '+')
+      if (((p->r)->op == '+') || ((p->r)->op == '-'))
         printf(") ");
     }
   }
@@ -119,12 +119,12 @@ void onp_filled(node* p) {
 void normalna_filled(node* p) {
   if (p != NULL) {
     if (p->l != NULL) {
-      if ((p->l)->op == '+')
+      if (((p->l)->op == '+') || ((p->l)->op == '-'))
         printf("( ");
     }
     normalna_filled(p->l);
     if (p->l != NULL) {
-      if ((p->l)->op == '+')
+      if (((p->l)->op == '+') || ((p->l)->op == '-'))
         printf(") ");
     }
     
@@ -134,12 +134,12 @@ void normalna_filled(node* p) {
       printf("%c ", p->op);
     
     if (p->r != NULL) {
-      if ((p->r)->op == '+')
+      if (((p->r)->op == '+') || ((p->r)->op == '-'))
         printf("( ");
     }
     normalna_filled(p->r);
     if (p->r != NULL) {
-      if ((p->r)->op == '+')
+      if (((p->r)->op == '+') || ((p->r)->op == '-'))
         printf(") ");
     }
   }
