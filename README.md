@@ -6,6 +6,26 @@ A simple C programme that parses and evaluates mathematical expressions.
 ### what
 It parses them and then stores them as _trees_. Therefore it is extremely easy to then use the [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation) as it [_grows on trees_](https://www.youtube.com/watch?v=TrfcJCulsF4) in a way.
 
+### parsing
+everything is parsed according to this simplified (im no bnf expert but [consult this website](http://homepage.divms.uiowa.edu/~jones/compiler/spring13/notes/10.shtml)) grammar:
+
+```grammar
+<expression> ::= <term> { + <term> }
+<term> ::= <factor> { * <factor> }
+<factor> ::=  <number> | ( <expression> ) }
+```
+of course the `+` could also be a `-` and the `*` could be `/` too. They are the same operation after all (but reversed).
+ 
+The process of parsing is based on the principal highlited in the grammar above with 
+three functions in `expressions.c` each creating a node for the tree:
+
+```C
+node *expr(...);
+node *term(...);
+node *factor(...);
+```
+
+### trees
 given an expression like `a+b*(c+d)` the programme creates a binary tree like structure that would look something like that:
 
 ```
