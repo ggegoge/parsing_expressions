@@ -57,7 +57,8 @@ it is all based on a recursive approach. If we had eg. a recursive procedure nam
 of course first it should be compiled `gcc -o parse main.c expressions.c onp.c`
 
 if we run it:
-```$ ./parse
+```
+$ ./parse
 Podaj wyrazenie matematyczne:
 (a*(b+c)*(d+e)+f)*(g+h*(i+j))
 Lukasiewicz:
