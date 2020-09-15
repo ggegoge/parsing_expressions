@@ -1,7 +1,6 @@
 # Expression parser
 A simple C programme that parses and evaluates mathematical expressions.
-
- therefore it uses 
+ 
 
 ### what
 It parses them and then stores them as _trees_. Therefore it is extremely easy to then use the [RPN](https://en.wikipedia.org/wiki/Reverse_Polish_notation) as it [_grows on trees_](https://www.youtube.com/watch?v=TrfcJCulsF4) in a way.
@@ -16,7 +15,7 @@ everything is parsed according to this simplified (im no bnf expert but [consult
 ```
 of course the `+` could also be a `-` and the `*` could be `/` too. They are the same operation after all (but reversed).
  
-The process of parsing is based on the principal highlited in the grammar above with 
+The process of parsing is based on the principle highlited in the grammar above with 
 three functions in `expressions.c` each creating a node for the tree:
 
 ```C
