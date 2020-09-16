@@ -7,12 +7,14 @@
 
 /* string p w indeksach od l do r zmienia w int */
 /* ujemna <-> jest znak <-> sign == 1 */
-int stoi(char* p, int l, int r, int sign) {
+int stoi(char* p, int len, int sign) {
   int res = 0;
   int i;
-  for (i=l; i<r; i++) {
+  p -= len;
+  for (i=0; i<len; i++) {
     res *= 10;
-    res += p[i] - '0';
+    res += *p - '0';
+    p++;
   }
   return sign ? -res : res;
 }

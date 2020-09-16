@@ -15,9 +15,9 @@ typedef struct node {
 <factor> ::= <num> | ( <expr> )
 */
 
-node *expr(char* p, int l, int r);
-node *term(char* p, int l, int r);
-node *factor(char* p, int l, int r);
+node *expr(char** p);
+node *term(char** p);
+node *factor(char** p);
 
 /* 'interface' */
 /* void run(char* str, int len); */

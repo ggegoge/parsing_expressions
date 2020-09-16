@@ -1,3 +1,5 @@
+/* Wersja sekwencyjna */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,103 +20,112 @@
 
 
 /* <expr> ::= <term> { + <term> } */
-node *expr(char* p, int l, int r) {
-  int l_parenth = 0, r_parenth = 0, i = r-1;   /* r bo od tylu */
+node *expr(char** p) {
+  int branch = 0, minus=0;
+  node * root2 = NULL;
   node * root = (node*) malloc(sizeof(node));
   root->l = NULL;
   root->r = NULL;
-  
-  /* przesuwa sie OD konca do - lub + NIE wewnatrz nawiasow */
-  while (((l_parenth != r_parenth) || !is_plus_minus(*(p+i))) && (i>=l)) {
-    if (*(p+i) == '(') l_parenth++;
-    if (*(p+i) == ')') r_parenth++;
-    i--;                             
-  }                                  
 
-  if (*(p+i) == '+') {
-    root->is_op = 1;      
-    root->op = '+';
-    root->l = expr(p, l, i);
-    root->r = term(p, i+1, r);
+  if (**p == '-') {
+    root = term(p);
+    branch = 1;
   }
-  else if (*(p+i) == '-')  {
-    if (i != l) {
-      root->is_op = 1;
-      root->op = '-';                 
-      root->l = expr(p, l, i);          /* { + <term> } */
-      root->r = term(p, i+1, r);       /* <term> */
+
+  while ((**p != '\0') && (**p)) {
+    if ((**p != '+') && (**p != '-')) {
+      if (**p == ')')
+        break;
+      if (!branch) {
+        root = term(p);
+        branch = 1;
+      }
+      else 
+        root->r = term(p);
     }
-    else
-      root = term(p, l, r);
-  }
-  else 
-    root = term(p, l, r);
-  
+    else {
+      root2 = root;
+      root = (node*) malloc(sizeof(node));
+      root->r = NULL;
+      root->l = root2;
+      root->op = **p;
+      root->is_op = 1;
+      (*p)++;
+    }
+  }                      
   return root;
 }
 
 
 /* <term> ::= <factor> { * <factor> } */
-node *term(char* p, int l, int r) {
-  int l_parenth = 0, r_parenth = 0, i = r-1;   
+node *term(char** p) {
+  int branch = 0;
+  node * root2;
   node * root = (node*) malloc(sizeof(node));
   root->l = NULL;
   root->r = NULL;
 
-  /* przesuwa sie od konca OD / lub * NIE wewnatrz nawiasow */
-  while ( ((l_parenth != r_parenth) || !is_star_div(*(p+i))) && (i>=l)) {
-    if (*(p+i) == '(') l_parenth++;
-    if (*(p+i) == ')') r_parenth++;
-    i--;
+  if (**p == '-') {
+
+    root = factor(p);
+    branch = 1;
   }
   
-  if (*(p+i) == '*') {
-    root->is_op = 1;
-    root->op = '*';
-    root->l = term(p, l, i);
-    root->r = factor(p, i+1, r);
-  }
-  else if (*(p+i) == '/') {
-    root->is_op = 1;
-    root->op = '/';
-    root->l = term(p, l, i);            /* { * <factor> } */
-    root->r = factor(p, i+1, r);       /* <factor> */
-  }  
-  else 
-    root = factor(p, l, r);
-  
+  while ((**p != '+') &&(**p != '-') && (**p != '\0')) {
+    if ((**p != '*') && (**p != '/')) {
+      if ((**p == ')') || **p == '\0')
+        return root;
+      if (!branch) {
+        root = factor(p);
+        branch = 1;
+      }
+      else 
+        root->r = factor(p);
+    }
+    else {
+      root2 = root;
+      root = (node*) malloc(sizeof(node));
+      root->r = NULL;
+      root->l = root2;
+      root->is_op = 1;
+      root->op = **p;
+      (*p)++;
+    }
+  }                      
   return root;
 }
 
 
 /* <factor> ::= <num> | ( <expr> ) */
-node *factor(char* p, int l, int r) {
+node *factor(char** p) {
+  int len = 0, sign = 0;
   node * root = (node*) malloc(sizeof(node));
   root->l = NULL;
   root->r = NULL;
-  if (*(p+l) == '(') {             /* ( <expr> ) */
-    if (*(p+r-1) == ')')
-      root = expr(p, l+1, r-1);
-    else {
-      printf("MISSING CLOSING PARENTHESES\n");
-      root = expr(p, l+1, r-2);
-    }
-  }      
+  
+  if (**p == '(') {             /* ( <expr> ) */
+    (*p)++;
+    root = expr(p);
+    if (**p != ')') 
+      printf("MISSING PARENTHESES\n");    
+    (*p)++;
+  }
   else {
-    root->is_op = 0;               /* <num> */
-    root->op = *(p+l);
-    if ((*(p+l) >= '0') && (*(p+l) <= '9'))
-      root->value = stoi(p, l, r, 0);
-    else if ((*(p+l) == '-') && (*(p+l+1) >= '0') && (*(p+l+1) <= '9')) {
-      root->op = '0';
-      root->value = stoi(p, l+1, r, 1);
-    }
-    else if (*(p+l) == '-') {
-      root->is_op = 1;
-      root->op = '-';
-      root->l = factor("0", 0, 0);
-      root->r = factor(p, l+1, r);
-    }
+    root->op = **p;
+    if (((root->op >= '0') && (root->op <= '9')) || root->op == '-') {
+      if (**p == '-') {
+        sign = 1;
+        (*p)++;
+        root->op = **p;
+      }      
+      while ((**p >= '0') && (**p <= '9')) {
+        len++;
+        (*p)++;
+      }
+      root->value = stoi(*p, len, sign);
+    } else
+      (*p)++;      
+    root->is_op = 0;
   }
   return root;
 }

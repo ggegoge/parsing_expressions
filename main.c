@@ -10,9 +10,9 @@ int main(int argc, char** argv) {
   if (argc < 2) {
     printf("Podaj wyrazenie matematyczne:\n");
     scanf("%s", wyr);
-    run(wyr, strlen(wyr));
+    run(wyr);
   }
   else 
-    run(argv[1], strlen(argv[1]));
+    run(argv[1]);
   return 0;
 }
