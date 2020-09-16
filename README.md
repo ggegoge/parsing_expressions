@@ -55,7 +55,7 @@ it is all based on a recursive approach. If we had eg. a recursive procedure nam
 you can use standard arithmetic operations so these 4 operands: `+-*/`.
 Pass your expression without any spaces or it won't be registered correctly.
 
-As for now it can either be an expression with integers only or chars only (don't mix them together)
+As for now it can either be an expression with integers* only or chars only (don't mix them together)
 
 You can either pass it from the terminal so `./parse '<expression>'` or in the programme itself. Look below for an example
 
@@ -100,3 +100,31 @@ reminder, ze bylo to:
                               
 ```
 
+
+
+
+
+
+----------------
+\*_positive integers_ - negative numbers also work to some extent but in some cases it'd be better to explicitly state them as 0-x.
+Here's a working example:
+```
+$ ./parse '-2*(21/7+4)+(-5+(-2))*(-2)'
+Lukasiewicz:
++ * -2 + / 21 7 4 * + -5 -2 -2 
+Azciweisakul:
+-2 21 7 / 4 + * -5 -2 + -2 * + 
+reminder, ze bylo to:
+-2 * ( 21 / 7 + 4 ) + ( -5 + -2 ) * -2 = 0
+```
+and here's a problematic one:
+```
+$ ./parse '-(2*3-4)-(9-4)/2'
+Lukasiewicz:
+- 0 / - 9 4 2 
+Azciweisakul:
+0 9 4 - 2 / - 
+reminder, ze bylo to:
+0 - ( 9 - 4 ) / 2 = -2
+```
+as you see `-` before a bracket is problematic
