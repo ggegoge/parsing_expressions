@@ -121,10 +121,10 @@ and here's a problematic one:
 ```
 $ ./parse '-(2*3-4)-(9-4)/2'
 Lukasiewicz:
-- 0 / - 9 4 2 
+- - 0 - * 2 3 4 / - 9 4 2 
 Azciweisakul:
-0 9 4 - 2 / - 
+0 2 3 * 4 - - 9 4 - 2 / - 
 reminder, ze bylo to:
-0 - ( 9 - 4 ) / 2 = -2
+0 - ( 2 * 3 - 4 ) - ( 9 - 4 ) / 2 = -4
 ```
-as you see `-` before a bracket is problematic
+as you see a `-` before a bracket is problematic but the parser resolves the issue by adding a `0-..` instead
