@@ -19,6 +19,9 @@ node *expr(char* p, int l, int r);
 node *term(char* p, int l, int r);
 node *factor(char* p, int l, int r);
 
+/* 'interface' */
+/* void run(char* str, int len); */
+
 /* clean up */
 void delete_tree(node** p);
 

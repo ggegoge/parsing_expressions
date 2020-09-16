@@ -5,7 +5,7 @@
 #include "expressions.h"
 #include "onp.h"
 
-/* node zdefiniowany w "expressions.h" */
+/* typ strukturalny node zdefiniowany w "expressions.h" */
 
 
 
@@ -19,29 +19,29 @@
 
 /* <expr> ::= <term> { + <term> } */
 node *expr(char* p, int l, int r) {
-  int l_parenth = 0, r_parenth = 0, i = l;
+  int l_parenth = 0, r_parenth = 0, i = r-1;   /* r bo od tylu */
   node * root = (node*) malloc(sizeof(node));
   root->l = NULL;
   root->r = NULL;
   
-  /* przesuwa sie do konca lub do - lub + NIE wewnatrz nawiasow */
-  while (((l_parenth != r_parenth) || !is_plus_minus(*(p+i))) && (i<r)) {
+  /* przesuwa sie OD konca do - lub + NIE wewnatrz nawiasow */
+  while (((l_parenth != r_parenth) || !is_plus_minus(*(p+i))) && (i>=l)) {
     if (*(p+i) == '(') l_parenth++;
     if (*(p+i) == ')') r_parenth++;
-    i++;                             
+    i--;                             
   }                                  
 
   if (*(p+i) == '+') {
-    root->is_op = 1;
+    root->is_op = 1;      
     root->op = '+';
-    root->l = term(p, l, i);
-    root->r = expr(p, i+1, r);
+    root->l = expr(p, l, i);
+    root->r = term(p, i+1, r);
   }
   else if (*(p+i) == '-') {
     root->is_op = 1;
     root->op = '-';                 
-    root->l = term(p, l, i);         /* <term> */
-    root->r = expr(p, i+1, r);       /* { + <term> } */
+    root->l = expr(p, l, i);          /* { + <term> } */
+    root->r = term(p, i+1, r);       /* <term> */
   }
   else 
     root = term(p, l, r);
@@ -52,29 +52,29 @@ node *expr(char* p, int l, int r) {
 
 /* <term> ::= <factor> { * <factor> } */
 node *term(char* p, int l, int r) {
-  int l_parenth = 0, r_parenth = 0, i = l;
+  int l_parenth = 0, r_parenth = 0, i = r-1;   
   node * root = (node*) malloc(sizeof(node));
   root->l = NULL;
   root->r = NULL;
 
-  /* przesuwa sie do konca lub do / lub * NIE wewnatrz nawiasow */
-  while ( ((l_parenth != r_parenth) || !is_star_div(*(p+i))) && (i<r)) {
+  /* przesuwa sie od konca OD / lub * NIE wewnatrz nawiasow */
+  while ( ((l_parenth != r_parenth) || !is_star_div(*(p+i))) && (i>=l)) {
     if (*(p+i) == '(') l_parenth++;
     if (*(p+i) == ')') r_parenth++;
-    i++;
+    i--;
   }
   
   if (*(p+i) == '*') {
     root->is_op = 1;
     root->op = '*';
-    root->l = factor(p, l, i);
-    root->r = term(p, i+1, r);
+    root->l = term(p, l, i);
+    root->r = factor(p, i+1, r);
   }
   else if (*(p+i) == '/') {
     root->is_op = 1;
     root->op = '/';
-    root->l = factor(p, l, i);       /* <factor> */
-    root->r = term(p, i+1, r);       /* { * <factor> } */
+    root->l = term(p, l, i);            /* { * <factor> } */
+    root->r = factor(p, i+1, r);       /* <factor> */
   }  
   else 
     root = factor(p, l, r);
