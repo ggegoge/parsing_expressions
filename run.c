@@ -16,9 +16,9 @@ przyklady:
     liczebny: 2*(21/7+4)-(5+2)*2
 */
 
-void run(char* str){
+void run(char* str, int len) {
   node* root;
-  root = expr(&str); 
+  root = expr(str, 0, len);
   
   if (!if_nums(root)) {                    /* wariant symboliczny */
     printf("Lukasiewicz:\n");

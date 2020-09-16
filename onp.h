@@ -2,7 +2,7 @@
 #define ONP_H_
 
 /* string p w indeksach od l do r zmienia w int */
-int stoi(char* p, int len, int sign);
+int stoi(char* p, int l, int r, int sign);
 
 /* uproszczenie warunków pętli w <term> i <factor> */
 int is_plus_minus(char c);
