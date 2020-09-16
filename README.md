@@ -51,31 +51,48 @@ it is all based on a recursive approach. If we had eg. a recursive procedure nam
 * RPN: `P(root^.left); P(root^.right); P(root);`
 * traditional way: `P(root^.left); P(root); P(root^.right);`
 
+### how to
+you can use standard arithmetic operations so these 4 operands: `+-*/`.
+Pass your expression without any spaces or it won't be registered correctly.
+
 
 #### example of the programme running
-of course first it should be compiled `gcc -o parse main.c expressions.c onp.c`
+of course first it should be compiled `gcc -o parse main.c expressions.c onp.c run`
 
 if we run it:
 ```
-$ ./parse
-Podaj wyrazenie matematyczne:
-(a*(b+c)*(d+e)+f)*(g+h*(i+j))
+$ ./parse '(2*3-4)-(9-4)/2'
 Lukasiewicz:
-* + * a * + b c + d e f + g * h + i j 
+- - * 2 3 4 / - 9 4 2 
 Azciweisakul:
-a b c + d e + * * f + g h i j + * + * 
+2 3 * 4 - 9 4 - 2 / - 
+reminder, ze bylo to:
+2 * 3 - 4 - ( 9 - 4 ) / 2 = 0
+
+$ ./parse '(a*(b+c)*(d+e)+f)*(g+h*(i+j))'
+Lukasiewicz:
+* + * * a + b c + d e f + g * h + i j 
+Azciweisakul:
+a b c + * d e + * f + g h i j + * + * 
 reminder, ze bylo to:
 ( a * ( b + c ) * ( d + e ) + f ) * ( g + h * ( i + j ) ) 
-
-$ ./parse
-Podaj wyrazenie matematyczne:
-2*(21/7+4)-(5+2)*2
+$ ./parse '2*(21/7+4)-(5+2)*2'
 Lukasiewicz:
 - * 2 + / 21 7 4 * + 5 2 2 
 Azciweisakul:
 2 21 7 / 4 + * 5 2 + 2 * - 
 reminder, ze bylo to:
-2 * ( 21 / 7 + 4 ) - ( 5 + 2 ) * 2 = 0                                     
+2 * ( 21 / 7 + 4 ) - ( 5 + 2 ) * 2 = 0
+
+$ ./parse 
+Podaj wyrazenie matematyczne:
+8/(4/2)
+Lukasiewicz:
+/ 8 / 4 2 
+Azciweisakul:
+8 4 2 / / 
+reminder, ze bylo to:
+8 / ( 4 / 2 ) = 4                                
 ```
 note it evaluates the exmample with actual numbers.
 
