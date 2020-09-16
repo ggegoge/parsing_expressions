@@ -6,14 +6,15 @@
 
 
 /* string p w indeksach od l do r zmienia w int */
-int stoi(char* p, int l, int r) {
+/* ujemna <-> jest znak <-> sign == 1 */
+int stoi(char* p, int l, int r, int sign) {
   int res = 0;
   int i;
   for (i=l; i<r; i++) {
     res *= 10;
     res += p[i] - '0';
   }
-  return res;
+  return sign ? -res : res;
 }
 
 /* uproszczenie warunków pętli w <term> i <factor> */
@@ -33,13 +34,13 @@ int is_star_div(char c) {
 
 /* tryb wyrażenia znakowego czy liczbowej kalkulacji */
 int if_nums(node* p) {
-  if (p->l == NULL) {
+  if (p->r == NULL) {
     if ((p->op >= '0') && (p->op <= '9'))
       return 1;
     else
       return 0;
   }
-  return if_nums(p->l);
+  return if_nums(p->r);
 }
 
 /* notacja symboliczna tj dla if_nums == 0: */

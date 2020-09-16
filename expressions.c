@@ -37,11 +37,15 @@ node *expr(char* p, int l, int r) {
     root->l = expr(p, l, i);
     root->r = term(p, i+1, r);
   }
-  else if (*(p+i) == '-') {
-    root->is_op = 1;
-    root->op = '-';                 
-    root->l = expr(p, l, i);          /* { + <term> } */
-    root->r = term(p, i+1, r);       /* <term> */
+  else if (*(p+i) == '-')  {
+    if (i != l) {
+      root->is_op = 1;
+      root->op = '-';                 
+      root->l = expr(p, l, i);          /* { + <term> } */
+      root->r = term(p, i+1, r);       /* <term> */
+    }
+    else
+      root = term(p, l, r);
   }
   else 
     root = term(p, l, r);
@@ -99,8 +103,18 @@ node *factor(char* p, int l, int r) {
   else {
     root->is_op = 0;               /* <num> */
     root->op = *(p+l);
-    if ((*(p+l) >= '0') && (*(p+l) <='9'))
-      root->value = stoi(p, l, r);
+    if ((*(p+l) >= '0') && (*(p+l) <= '9'))
+      root->value = stoi(p, l, r, 0);
+    else if ((*(p+l) == '-') && (*(p+l+1) >= '0') && (*(p+l+1) <= '9')) {
+      root->op = '0';
+      root->value = stoi(p, l+1, r, 1);
+    }
+    else if (*(p+l) == '-') {
+      root->is_op = 1;
+      root->op = '-';
+      root->l = factor("0", 0, 0);
+      root->r = factor(p, l+1, r);
+    }
   }
   return root;
 }
