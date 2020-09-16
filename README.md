@@ -44,7 +44,7 @@ It also can reverse the process in order to get the standard Polish (or _Łukasi
 
 And if it is numeric it can be evaluated.
 
-#### the principal
+#### the principle
 it is all based on a recursive approach. If we had eg. a recursive procedure named `P` that we want to apply to the tree (and its every node) then RPN, PN and traditional notation all portray the same thing but in different order of `P`ing:
 
 * PN: `P(root); P(root^.left); P(root^.right);`
@@ -55,9 +55,12 @@ it is all based on a recursive approach. If we had eg. a recursive procedure nam
 you can use standard arithmetic operations so these 4 operands: `+-*/`.
 Pass your expression without any spaces or it won't be registered correctly.
 
+As for now it can either be an expression with integers only or chars only (don't mix them together)
+
+You can either pass it from the terminal so `./parse '<expression>'` or in the programme itself. Look below for an example
 
 #### example of the programme running
-of course first it should be compiled `gcc -o parse main.c expressions.c onp.c run`
+of course first it should be compiled `gcc -o parse main.c expressions.c onp.c run.c`
 
 if we run it:
 ```
@@ -76,6 +79,7 @@ Azciweisakul:
 a b c + * d e + * f + g h i j + * + * 
 reminder, ze bylo to:
 ( a * ( b + c ) * ( d + e ) + f ) * ( g + h * ( i + j ) ) 
+
 $ ./parse '2*(21/7+4)-(5+2)*2'
 Lukasiewicz:
 - * 2 + / 21 7 4 * + 5 2 2 
@@ -84,7 +88,7 @@ Azciweisakul:
 reminder, ze bylo to:
 2 * ( 21 / 7 + 4 ) - ( 5 + 2 ) * 2 = 0
 
-$ ./parse 
+$ ./parse
 Podaj wyrazenie matematyczne:
 8/(4/2)
 Lukasiewicz:
@@ -92,7 +96,7 @@ Lukasiewicz:
 Azciweisakul:
 8 4 2 / / 
 reminder, ze bylo to:
-8 / ( 4 / 2 ) = 4                                
+8 / ( 4 / 2 ) = 4
+                              
 ```
-note it evaluates the exmample with actual numbers.
 
