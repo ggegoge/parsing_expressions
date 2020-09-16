@@ -64,25 +64,42 @@ void onp(node* p) {
 
 
 /* zwykly zapis matematyczny */
+/* 
+sa nawiasy wedlug nastepujacego algorytmu:
+   - przylaczam lewa galaz wezla p (p^.l) z nawiasami wtw gdy operator
+     p to nie jest ani plus ani minus. zatem (a+b)*p^.r, ale a+b+p^.r 
+   - przylaczam prawa galaz z nawiasami wtw gdy 
+       1. p^.op to -, a operator p^.r to - lub plus
+       2. p^.op to / i dowolny operator w p^.r
+       3. p^.op to * i w p^.r operator nie*
+i skomplikowane ify aczkolwiek dzialajace
+*/
+
 void normalna(node* p) {
   if (p != NULL) {               /* rekur left, do, rekur right */
     if (p->l != NULL) { 
-      if (((p->l)->op == '+') || ((p->l)->op == '-'))
+      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
         printf("( ");
     }
     normalna(p->l);
     if (p->l != NULL) {
-      if (((p->l)->op == '+') || ((p->l)->op == '-'))
+      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
         printf(") ");
     }
+    
     printf("%c ", p->op);
+    
     if (p->r != NULL) {
-      if (((p->r)->op == '+') || ((p->r)->op == '-'))
+      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
+           || ( (p->op == '/') && ((p->r)->is_op) )
+           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
         printf("( ");
     }
     normalna(p->r);
     if (p->r != NULL) {
-      if (((p->r)->op == '+') || ((p->r)->op == '-'))
+      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
+           || ( (p->op == '/') && ((p->r)->is_op) )
+           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
         printf(") ");
     }
   }
@@ -117,14 +134,14 @@ void onp_filled(node* p) {
 
 
 void normalna_filled(node* p) {
-  if (p != NULL) {
-    if (p->l != NULL) {
-      if (((p->l)->op == '+') || ((p->l)->op == '-'))
+  if (p != NULL) {               /* rekur left, do, rekur right */
+    if (p->l != NULL) { 
+      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
         printf("( ");
     }
     normalna_filled(p->l);
     if (p->l != NULL) {
-      if (((p->l)->op == '+') || ((p->l)->op == '-'))
+      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
         printf(") ");
     }
     
@@ -134,16 +151,22 @@ void normalna_filled(node* p) {
       printf("%c ", p->op);
     
     if (p->r != NULL) {
-      if (((p->r)->op == '+') || ((p->r)->op == '-'))
+      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
+           || ( (p->op == '/') && ((p->r)->is_op) )
+           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
         printf("( ");
     }
     normalna_filled(p->r);
     if (p->r != NULL) {
-      if (((p->r)->op == '+') || ((p->r)->op == '-'))
+      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
+           || ( (p->op == '/') && ((p->r)->is_op) )
+           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
         printf(") ");
     }
   }
 }
+
+
 
 
 /* oblicza wartosc wyrazenia liczbowego*/
