@@ -2,6 +2,6 @@
 #define RUN_H_
 
 /* 'interface' */
-void run(char* str, int len);
+void run(char* str);
 
 #endif 
