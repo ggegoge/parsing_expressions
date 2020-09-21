@@ -10,7 +10,6 @@
 /* typ strukturalny node zdefiniowany w "expressions.h" */
 
 
-
 /* GRAMATYKA
 
 <expr> ::= <term> { +|- <term> }
@@ -40,8 +39,8 @@ node *expr(char** p) {
     (*p)++; 
     branch = 1;
   }
-  while ((**p != '\0') && (**p)) {
-    if ((**p != '+') && (**p != '-')) {
+  while (**p != '\0' && **p) {
+    if (**p != '+' && **p != '-') {
       if (**p == ')')
         break;
       if (!branch) {
@@ -73,9 +72,9 @@ node *term(char** p) {
   root->l = NULL;
   root->r = NULL;
   
-  while ((**p != '+') &&(**p != '-') && (**p != '\0')) {
-    if ((**p != '*') && (**p != '/')) {
-      if ((**p == ')') || **p == '\0')
+  while (**p != '+' && **p != '-' && **p != '\0') {
+    if (**p != '*' && **p != '/') {
+      if (**p == ')' || **p == '\0')
         return root;
       if (!branch) {
         root = factor(p);
@@ -114,13 +113,13 @@ node *factor(char** p) {
   }
   else {
     root->op = **p;
-    if (((root->op >= '0') && (root->op <= '9')) || root->op == '-') {
+    if ((root->op >= '0' && root->op <= '9') || root->op == '-') {
       if (**p == '-') {
         sign = 1;
         (*p)++;
         root->op = **p;
       }      
-      while ((**p >= '0') && (**p <= '9')) {
+      while (**p >= '0' && **p <= '9') {
         len++;
         (*p)++;
       }

@@ -4,10 +4,6 @@
 /* string p w indeksach od l do r zmienia w int */
 int stoi(char* p, int len, int sign);
 
-/* uproszczenie warunków pętli w <term> i <factor> */
-int is_plus_minus(char c);
-int is_star_div(char c);
-
 /* tryb wyrażenia znakowego czy liczbowej kalkulacji */
 int if_nums(node* p);
 
