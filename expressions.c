@@ -1,3 +1,5 @@
+/* Wersja up to bottom*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,7 +8,6 @@
 #include "onp.h"
 
 /* typ strukturalny node zdefiniowany w "expressions.h" */
-
 
 
 /* GRAMATYKA
@@ -25,7 +26,7 @@ node *expr(char* p, int l, int r) {
   root->r = NULL;
   
   /* przesuwa sie OD konca do - lub + NIE wewnatrz nawiasow */
-  while (((l_parenth != r_parenth) || !is_plus_minus(*(p+i))) && (i>=l)) {
+  while ((l_parenth != r_parenth || !is_plus_minus(*(p+i))) && i>=l) {
     if (*(p+i) == '(') l_parenth++;
     if (*(p+i) == ')') r_parenth++;
     i--;                             
@@ -62,7 +63,7 @@ node *term(char* p, int l, int r) {
   root->r = NULL;
 
   /* przesuwa sie od konca OD / lub * NIE wewnatrz nawiasow */
-  while ( ((l_parenth != r_parenth) || !is_star_div(*(p+i))) && (i>=l)) {
+  while ( (l_parenth != r_parenth || !is_star_div(*(p+i))) && i>=l) {
     if (*(p+i) == '(') l_parenth++;
     if (*(p+i) == ')') r_parenth++;
     i--;
@@ -105,7 +106,7 @@ node *factor(char* p, int l, int r) {
     root->op = *(p+l);
     if ((*(p+l) >= '0') && (*(p+l) <= '9'))
       root->value = stoi(p, l, r, 0);
-    else if ((*(p+l) == '-') && (*(p+l+1) >= '0') && (*(p+l+1) <= '9')) {
+    else if (*(p+l) == '-' && *(p+l+1) >= '0' && *(p+l+1) <= '9') {
       root->op = '0';
       root->value = stoi(p, l+1, r, 1);
     }

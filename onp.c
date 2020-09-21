@@ -26,7 +26,7 @@ int is_plus_minus(char c) {
     return 0;
 }
 int is_star_div(char c) {
-  if ((c == '*') || (c == '/'))
+  if (c == '*' || c == '/')
     return 1;
   else
     return 0;
@@ -35,7 +35,7 @@ int is_star_div(char c) {
 /* tryb wyrażenia znakowego czy liczbowej kalkulacji */
 int if_nums(node* p) {
   if (p->r == NULL) {
-    if ((p->op >= '0') && (p->op <= '9'))
+    if (p->op >= '0' && p->op <= '9')
       return 1;
     else
       return 0;
@@ -79,28 +79,28 @@ i skomplikowane ify aczkolwiek dzialajace
 void normalna(node* p) {
   if (p != NULL) {               /* rekur left, do, rekur right */
     if (p->l != NULL) { 
-      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
+      if (((p->l)->op == '+' || p->l->op == '-') && !(p->op == '+' || p->op == '-'))
         printf("( ");
     }
     normalna(p->l);
     if (p->l != NULL) {
-      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
+      if (((p->l)->op == '+' || p->l->op == '-') && !(p->op == '+' || p->op == '-'))
         printf(") ");
     }
     
     printf("%c ", p->op);
     
     if (p->r != NULL) {
-      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
-           || ( (p->op == '/') && ((p->r)->is_op) )
-           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
+      if ( ( p->op == '-' && ( p->r->op == '+' || p->r->op == '-' ) )
+           || ( p->op == '/' && p->r->is_op )
+           ||  ( p->op == '*' && p->r->is_op && p->r->op != '*') )
         printf("( ");
     }
     normalna(p->r);
     if (p->r != NULL) {
-      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
-           || ( (p->op == '/') && ((p->r)->is_op) )
-           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
+      if ( ( p->op == '-' && ( p->r->op == '+' || p->r->op == '-' ) )
+           || ( p->op == '/' && p->r->is_op )
+           ||  ( p->op == '*' && p->r->is_op && p->r->op != '*') )
         printf(") ");
     }
   }
@@ -135,33 +135,33 @@ void onp_filled(node* p) {
 
 
 void normalna_filled(node* p) {
-  if (p != NULL) {               /* rekur left, do, rekur right */
+  if (p != NULL) {               
     if (p->l != NULL) { 
-      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
+      if (((p->l)->op == '+' || p->l->op == '-') && !(p->op == '+' || p->op == '-'))
         printf("( ");
     }
     normalna_filled(p->l);
     if (p->l != NULL) {
-      if ((((p->l)->op == '+') || ((p->l)->op == '-')) && !((p->op == '+') || (p->op == '-')))
+      if (((p->l)->op == '+' || p->l->op == '-') && !(p->op == '+' || p->op == '-'))
         printf(") ");
     }
-    
+   
     if (!p->is_op)
       printf("%d ", p->value);
     else
       printf("%c ", p->op);
     
     if (p->r != NULL) {
-      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
-           || ( (p->op == '/') && ((p->r)->is_op) )
-           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
+      if ( ( p->op == '-' && ( p->r->op == '+' || p->r->op == '-' ) )
+           || ( p->op == '/' && p->r->is_op )
+           ||  ( p->op == '*' && p->r->is_op && p->r->op != '*') )
         printf("( ");
     }
     normalna_filled(p->r);
     if (p->r != NULL) {
-      if ( ( (p->op == '-') && ( ((p->r)->op == '+') || ((p->r)->op == '-') ) )
-           || ( (p->op == '/') && ((p->r)->is_op) )
-           ||  ( (p->op == '*') && ((p->r)->is_op) && ((p->r)->op != '*')) )
+      if ( ( p->op == '-' && ( p->r->op == '+' || p->r->op == '-' ) )
+           || ( p->op == '/' && p->r->is_op )
+           ||  ( p->op == '*' && p->r->is_op && p->r->op != '*') )
         printf(") ");
     }
   }
