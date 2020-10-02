@@ -45,11 +45,15 @@ node *expr(char* p, int l, int r) {
       root->l = expr(p, l, i);          /* { + <term> } */
       root->r = term(p, i+1, r);       /* <term> */
     }
-    else
+    else {
+      free(root);
       root = term(p, l, r);
+    }
   }
-  else 
+  else  {
+    free(root);
     root = term(p, l, r);
+  }
   
   return root;
 }
@@ -81,8 +85,10 @@ node *term(char* p, int l, int r) {
     root->l = term(p, l, i);            /* { * <factor> } */
     root->r = factor(p, i+1, r);       /* <factor> */
   }  
-  else 
+  else {
+    free(root);
     root = factor(p, l, r);
+  }
   
   return root;
 }
@@ -94,9 +100,12 @@ node *factor(char* p, int l, int r) {
   root->l = NULL;
   root->r = NULL;
   if (*(p+l) == '(') {             /* ( <expr> ) */
-    if (*(p+r-1) == ')')
+    if (*(p+r-1) == ')') {
+      free(root);
       root = expr(p, l+1, r-1);
+    }
     else {
+      free(root);
       printf("MISSING CLOSING PARENTHESES\n");
       root = expr(p, l+1, r-2);
     }
@@ -123,11 +132,11 @@ node *factor(char* p, int l, int r) {
   
 
 
-void delete_tree(node ** p) {
-  if (*p == NULL)
+void delete_tree(node * p) {
+  if (p == NULL)
     return;
-  delete_tree(&((*p)->l));     /* is this right? */
-  delete_tree(&((*p)->r));
-  free(*p);
-  *p = NULL;
+  delete_tree(p->l);     /* is this right? */
+  delete_tree(p->r);
+  free(p);
+  p = NULL;
 }

@@ -48,5 +48,5 @@ void run(char* str, int len) {
   }
   
   /* clean up */
-  delete_tree(&root);
+  delete_tree(root);
 }
