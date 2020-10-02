@@ -44,6 +44,7 @@ node *expr(char** p) {
       if (**p == ')')
         break;
       if (!branch) {
+        free(root);
         root = term(p);
         branch = 1;
       }
@@ -77,6 +78,7 @@ node *term(char** p) {
       if (**p == ')' || **p == '\0')
         return root;
       if (!branch) {
+        free(root);
         root = factor(p);
         branch = 1;
       }
@@ -106,6 +108,7 @@ node *factor(char** p) {
   
   if (**p == '(') {             /* ( <expr> ) */
     (*p)++;
+    free(root);
     root = expr(p);
     if (**p != ')') 
       printf("MISSING PARENTHESES\n");    
@@ -134,11 +137,11 @@ node *factor(char** p) {
   
 
 
-void delete_tree(node ** p) {
-  if (*p == NULL)
+void delete_tree(node * p) {
+  if (p == NULL)
     return;
-  delete_tree(&((*p)->l));     /* is this right? */
-  delete_tree(&((*p)->r));
-  free(*p);
-  *p = NULL;
+  delete_tree(p->l);     /* is this right? */
+  delete_tree(p->r);
+  free(p);
+  p = NULL;
 }

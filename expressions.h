@@ -23,6 +23,6 @@ node *factor(char** p);
 /* void run(char* str, int len); */
 
 /* clean up */
-void delete_tree(node** p);
+void delete_tree(node* p);
 
 #endif 
