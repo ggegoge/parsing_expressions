@@ -1,5 +1,5 @@
 # Expression parser
-A simple C programme that parses and evaluates mathematical expressions.
+A simple C program that parses and evaluates mathematical expressions.
  
 
 ### what
