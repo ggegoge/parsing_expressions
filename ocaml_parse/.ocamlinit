@@ -1,0 +1,5 @@
+#directory "_build";;
+#load "parser.cmo";;
+#load "lexer.cmo";;
+#load "main.cmo";;
+open Main;;

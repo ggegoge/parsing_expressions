@@ -1,0 +1,3 @@
+#+TITLE: Parsing expressions in a functional way
+I am not that smart to create all that out of the blue. [[https://www.cs.cornell.edu/courses/cs3110/2020fa/textbook/interp/intro.html][This course]]
+and [[https://medium.com/@aleksandrasays/tutorial-parsing-json-with-ocaml-579cc054924f][this article]] were quite helpful to me in the process.

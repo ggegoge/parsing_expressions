@@ -1,0 +1,30 @@
+#+TITLE: Parsing arithmetical expressions
+In this repository I keep my parsers for simple parsers for basic
+arithemtics on natural numbers. 
+** Brief overview of the repository
+I have three distinct directories for three distinct-ish here which all differ in some way. 
+*** Parsers written in C
+Those are in the ~c_*~ directories with appropriate READMEs
+attached. There are two of them but they are quite similar apart from
+couple major differences.
+**** ~c_non_seq~
+This is the first one I made. It processes the maths expression in a
+non-sequential manner ie. it loads the expression, finds the ~+~, ~*~
+etc and then finds the both sides of it and only then evaluates the
+captured expression between those two pointers
+**** ~c_seq~
+This one works in a sequential way -- it keeps only one pointer that
+goes through the expression from right to left and then adds next
+elements recursively (more details below)
+*** The ocaml parser
+In the ~ocaml_parse~ I keep the parser written in ocaml. It works
+similarily to the ~c_seq~ one but is much more /neat/. It depends on
+the *menhir* library (which I think dates back to *yacc*). 
+** Usage
+For all parsers the usage (should be) is specified in their
+directories' readmes.
+** Not as brief of an overview
+*** C parsers
+**** non sequential
+**** sequential
+*** Ocaml parser
