@@ -1,4 +1,5 @@
 #+TITLE: Parsing arithmetical expressions
+#+DATE: 23.02.2021
 In this repository I keep my parsers for simple parsers for basic
 arithemtics on natural numbers. 
 ** Brief overview of the repository
@@ -24,7 +25,204 @@ the *menhir* library (which I think dates back to *yacc*).
 For all parsers the usage (should be) is specified in their
 directories' readmes.
 ** Not as brief of an overview
+*** Parsing arithmetics in general
+With parsing one ought always think of the grammar before actually
+indulging in any coding. Context free grammar is quite cool and lets
+you pretend to be super smart but perhaps a better choice would be to
+use something more readable such as the *Backus--Naur form* (BNF,
+please [[https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form][consult wikipedia]] for details). But for that one should have
+some intuition before hand or else how would you come up with the
+grammar?
+**** arithemtics as trees and forests
+The idea of making an arithemtics parser occured to me first when
+I was analysing the nature of the *Łukasiewicz notation* (aka /the
+Polish notation/) and the *Azciweisakuł notation* (/the Reversed
+Polish notation). It first was used as [[https://plato.stanford.edu/entries/lukasiewicz/polish-notation.html][a notation for logic]] but then
+it was deemed useful by [[https://youtu.be/TrfcJCulsF4][computer scientists]] because of its natural
+stacky/tree-y nature. Eg. the expression ~2 + 3 * (4 + 5)~ in PN would
+look like ~+ 2 * 3 + 4 5~ so as we see when compared to the standard
+notation it is like something ~<binary operator> <arg1> <arg2>~
+instead of ~<a1> <bop> <a2>~. So we first get the element that
+/combines/ the two values and then we recursively get the values
+themselves (perhaps composed of something like that as well). Hence
+one could see that there is a tree-like structure hidden here. The
+leafs are filled with numbers (the atoms of arithmetics) and the nodes
+that combine them are the binary operations.
+
+This way we discover the idea of an /abstract syntax tree/ or *AST*
+for short. How does such tree look like?
+Using the example from above:
+#+BEGIN_EXAMPLE
+      +
+     / \
+    /   \
+   2     *
+        / \
+       /   \
+      3     +
+           / \
+          /   \
+         4     5
+#+END_EXAMPLE
+this is the tree representing the operation
+| standard notation | Polish notation | reverse pn      |
+|-------------------+-----------------+-----------------|
+| ~2 + 3 * (4 + 5)~ | ~+ 2 * 3 + 4 5~ | ~2 3 4 5 + * +~ |
+Here we can see how the structure plays out -- when we have a ~+~ in a
+node that has incoming multiplication, then it needs parentheses to
+perserve the order of operations. Without any further details we cas
+present this grammar:
+#+BEGIN_EXAMPLE
+  <expr> ::= <term> + <expr> | <term> - <expr> | <term>
+  <term> ::= - <term> | <factor> * <term> | <factor> / <term>
+  <factor> ::= (<expr>) | <number> | <variable>
+#+END_EXAMPLE
+So we have the syntax denoted here. But actually it denotes something
+that is not exactly as our classicl arithmetic expressions
+look. Something like ~2 * -3~ is completely valid when it comes to
+this grammar (and frankly -- I think it makes sense, it is unambiguous
+hence there is no reason but aesthetics that would make us resign for
+letting the unary minus work without parentheses) but in reality we'd
+use ~2 * (-3)~.
+
+So the grammar would look better as:
+#+BEGIN_EXAMPLE
+  <expr> ::= [ - ] <term> + <expr> | <term> - <expr> | <term>
+  <term> ::= <term> | <factor> * <term> | <factor> / <term>
+  <factor> ::= (<expr>) | <number> | <variable>
+#+END_EXAMPLE
+with the minus still being an aspect of a term (or even a factor) but
+it needs to be caught in the ~<expr>~ production.
 *** C parsers
+We use structs as the data structure letting us maintain these trees.
+#+BEGIN_SRC C
+  typedef struct node {
+    int is_op, value;
+    char op;
+    struct node * l, * r;
+  } node;
+
+
+  /* simplified grammar
+   ,* <expr> ::= <term> { + <term> }
+   ,* <term> ::= <factor> { * <factor> }
+   ,* <factor> ::= <num> | ( <expr> ) */
+#+END_SRC
+we then use them in different ways. ~is_op~ serves as a way to
+distinguish between a node and a leaf.
 **** non sequential
+We have functions that create a node of each /type/, they get the left
+and right index of beggining and ending of the appriopriate section
+#+BEGIN_SRC C
+  node *expr(char* p, int l, int r);
+  node *term(char* p, int l, int r);
+  node *factor(char* p, int l, int r);
+#+END_SRC
 **** sequential
+here we parse the string as it goes
+#+BEGIN_SRC C
+  node *expr(char** p);
+  node *term(char** p);
+  node *factor(char** p);
+#+END_SRC
 *** Ocaml parser
+Ocaml as a functional language is the real charm. We can in fact mimic
+the AST so well it exactly matches the grammar of ours. Take a look:
+#+BEGIN_SRC ocaml
+  type expr =  
+    | Plus of term * expr
+    | Minus of term * expr
+    | Term of term
+  and term =
+    | FMinus of term
+    | Times of factor * term
+    | Div of factor * term
+    | Factor of factor
+  and factor = Expr of expr | Num of int | Var of string
+#+END_SRC
+the structure is preserved perfectly -- we have all pieces as in above
+main grammar.
+
+When it comes to parsing /per se/ we have this neat piece of ~.mly~
+code:
+#+BEGIN_SRC ocaml
+  expr:
+    | t = term PLUS e = expr { Plus (t, e) }
+    | t = term MINUS e = expr { Minus (t, e) }
+    | t = term { Term t }
+  ;
+
+  term:
+    | MINUS t = term %prec FMINUS { FMinus t }
+    | f = factor TIMES t = term { Times (f, t) }
+    | f = factor DIV t = term { Div (f, t) }
+    | f = factor { Factor f }
+  ;
+
+  factor:
+    | LPAREN e = expr RPAREN { Expr e }
+    | n = NUM { Num n }
+    | x = VAR { Var x }
+  ;
+#+END_SRC
+and it is very nice indeed but it allows something that is not that
+possible in mathematics as we discussed above (~2 * -3~ makes sense,
+prove me wrong!). So the proper way to denote it is:
+#+BEGIN_SRC ocaml
+  expr:
+    | MINUS t = term PLUS e = expr %prec FMINUS { Plus(FMinus t, e) }
+    | MINUS t = term MINUS e = expr %prec FMINUS { Plus(FMinus t, e) }
+    | MINUS t = term %prec FMINUS { Term (FMinus t) }
+    | t = term PLUS e = expr { Plus (t, e) }
+    | t = term MINUS e = expr { Minus (t, e) }
+    | t = term { Term t }
+  ;
+
+  term:
+    | f = factor TIMES t = term { Times (f, t) }
+    | f = factor DIV t = term { Div (f, t) }
+    | f = factor { Factor f }
+  ;
+
+  factor:
+    | LPAREN e = expr RPAREN { Expr e }
+    | n = NUM { Num n }
+    | x = VAR { Var x }
+  ;
+#+END_SRC
+with the frontal minus being caught by the beggining of the expression
+production. 
+
+So we have ast.ml with the above-shown AST, we have parser.mly with
+the parser and we have a lexer.mll file that changes written text as
+~2 + 3 / 1~ into simple lexemes like ~2 PLUS 3 DIV 1~ etc. In main.ml
+we have evaluation and different notations to choose from. 
+
+**** Example of it working:
+#+BEGIN_SRC ocaml
+  # let s = "-5 * (2 - 4) * ((3 * 2) + 5)";;
+  val s : string = "-5 * (2 - 4) * ((3 * 2) + 5)"
+  # let e = parse s;;
+  val e : Ast.expr =
+    Ast.Term
+     (Ast.FMinus
+       (Ast.Times (Ast.Num 5,
+         Ast.Times
+          (Ast.Expr
+            (Ast.Minus (Ast.Factor (Ast.Num 2),
+              Ast.Term (Ast.Factor (Ast.Num 4)))),
+          Ast.Factor
+           (Ast.Expr
+             (Ast.Plus
+               (Ast.Factor
+                 (Ast.Expr
+                   (Ast.Term (Ast.Times (Ast.Num 3, Ast.Factor (Ast.Num 2))))),
+               Ast.Term (Ast.Factor (Ast.Num 5)))))))))
+  # eval e;;
+  - : int = 110
+  # pn e; infix e; rpn e;;
+    * 5 * - 2 4 + * 3 2 5
+    5 * (2 - 4) * ((3 * 2) + 5)
+    5 2 4 - 3 2 * 5 + * *
+#+END_SRC
+we have parsing, evaluation and PN, infix and RPN notations.

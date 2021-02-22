@@ -1,4 +1,5 @@
 (* parsing examples *)
+open Main
 
 let s = "2 + 4";;
 let e = parse s;;
@@ -20,12 +21,22 @@ let e = parse s;;
 eval e;;
 pn e; infix e; rpn e;;
 
+let s = "-(10 * (-1 + 2 + 10))"
+let e = parse s;;
+eval e;;
+pn e; infix e; rpn e;;
+
 let s = "1 + 2 + 3"
 let e = parse s;;
 eval e;;
 pn e; infix e; rpn e;;
 
 let s = "1 * -2"
+let e = parse s;;
+eval e;;
+pn e; infix e; rpn e;;
+
+let s = "-5 * (2 - 4) * ((3 * 2) + 5)"
 let e = parse s;;
 eval e;;
 pn e; infix e; rpn e;;
