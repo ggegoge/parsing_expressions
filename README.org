@@ -98,6 +98,15 @@ So the grammar would look better as:
 #+END_EXAMPLE
 with the minus still being an aspect of a term (or even a factor) but
 it needs to be caught in the ~<expr>~ production.
+****** powers
+We might as well add exponents if it is what we want. Right now I've
+implemented that only in the simpler ocaml parser. We'd have to adjust
+our grammar accordingly:
+#+BEGIN_EXAMPLE
+  <expr> ::= [ - ] <term> + <expr> | <term> - <expr> | <term>
+  <term> ::= <term> | <factor> * <term> | <factor> / <term>
+  <factor> ::= <factor ^ <factor> | (<expr>) | <number> | <variable>
+#+END_EXAMPLE
 *** C parsers
 We use structs as the data structure letting us maintain these trees.
 #+BEGIN_SRC C
@@ -181,6 +190,7 @@ TIMES~ et which are much easy to handle. The [[file:ocaml_simple/parser.mly][par
   ;
 
   factor:
+    | f1 = factor POW f2 = factor { Node(f1, Pow, f2) }
     | LPAREN e = expr RPAREN { e }
     | n = NUM { Leaf n }
     | x = VAR { VLeaf x }
