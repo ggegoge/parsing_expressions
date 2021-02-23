@@ -15,5 +15,5 @@ _build/lexer.ml _build/lexer.mll:
 
 example: example.byte;
 
-example.byte: _build/parser.mly _build/lexer.ml _build/lexer.mll
+example.byte: example.ml _build/parser.mly _build/lexer.ml _build/lexer.mll
 	ocamlbuild -use-menhir -menhir "menhir --unused-precedence-levels" example.byte
