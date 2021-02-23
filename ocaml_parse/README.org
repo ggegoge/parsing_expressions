@@ -1,3 +1,46 @@
 #+TITLE: Parsing expressions in a functional way
 I am not that smart to create all that out of the blue. [[https://www.cs.cornell.edu/courses/cs3110/2020fa/textbook/interp/intro.html][This course]]
 and [[https://medium.com/@aleksandrasays/tutorial-parsing-json-with-ocaml-579cc054924f][this article]] were quite helpful to me in the process.
+** Usage
+To use the parser you have to first compile it using ~make -k~. Then
+you can use it interactively by running ocaml or utop. Thanks to the
+[[file:.ocamlinit][.ocamlinit]] file the module is loaded at start so you can simply use it
+like that:
+#+BEGIN_SRC ocaml
+  # let s = "-5 * (2 - 4) * ((3 * 2) + 5)";;
+  val s : string = "-5 * (2 - 4) * ((3 * 2) + 5)"
+  # let e = parse s;;
+  val e : Ast.expr =
+    Ast.Term
+     (Ast.FMinus
+       (Ast.Times (Ast.Num 5,
+         Ast.Times
+          (Ast.Expr
+            (Ast.Minus (Ast.Factor (Ast.Num 2),
+              Ast.Term (Ast.Factor (Ast.Num 4)))),
+          Ast.Factor
+           (Ast.Expr
+             (Ast.Plus
+               (Ast.Factor
+                 (Ast.Expr
+                   (Ast.Term (Ast.Times (Ast.Num 3, Ast.Factor (Ast.Num 2))))),
+               Ast.Term (Ast.Factor (Ast.Num 5)))))))))
+  # eval e;;
+  - : int = 110
+  # pn e; infix e; rpn e;;
+    * 5 * - 2 4 + * 3 2 5
+    5 * (2 - 4) * ((3 * 2) + 5)
+    5 2 4 - 3 2 * 5 + * *
+#+END_SRC
+
+Other option is to compile files. For example see [[file:example.ml][example.ml]]. There we
+load ~Ast~ and ~Main~ and then we use functions decalred there to
+parse some stuff. If we'd like to compile it would be as simple as
+doing ~ocamlbuild -use-menhir example.byte~ having the lexer and the
+parser compiled. Or, a longer version without unnecessary warnings, is
+~ocamlbuild -use-menhir -menhir "menhir --unused-precedence-levels" example.byte~. 
+Then execute it with ~./example.byte~.
+
+You can see the makefile for details
+**** TODO support for parsing from files
+perhaps in the future
