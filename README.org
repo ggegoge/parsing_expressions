@@ -131,6 +131,78 @@ here we parse the string as it goes
   node *factor(char** p);
 #+END_SRC
 *** Ocaml parsers
+**** the simple version
+We can keep everything very simple and design our AST based not on the
+grammar but on our tree diagram from above. Then we need those
+posibilities:
+1. leaves -- the /atoms/ of arithmetic which end the tree. we have
+   two options for those
+   1. leaves carrying a number
+   2. leaves carrying a symbol
+2. the pesky frontal minus as a singular node which just marks that
+   the term should be negated
+3. the basic binary node with children being the operands and an
+   operator in the node
+
+Having considered these points we can make such an AST:
+#+BEGIN_SRC ocaml
+  (* binary operation *)
+  type bop = Sum | Mult | Diff | Divis
+
+  (* the most basic arithemtics tree *)
+  type arithtree =
+    | Leaf of int
+    | VLeaf of string
+    | SNode of arithtree
+    | Node of arithtree * bop * arithtree
+#+END_SRC
+it is much simpler than the ~ocaml_grammary~ version but of course it
+doesn't mimic the grammar but rather the actual arithmetic
+tree. Another minor disadvantage is that we dont have original parentheses
+and structure marked that well.
+
+The lexer.mll file translates the raw text into lexems like ~DIV
+TIMES~ et which are much easy to handle. The [[file:ocaml_simple/parser.mly][parser.mly]] has these productions listed:
+#+BEGIN_SRC ocaml
+  expr:
+    | MINUS t = term PLUS e = expr %prec FMINUS { Node (SNode t, Sum, e) }
+    | MINUS t = term MINUS e = expr %prec FMINUS { Node (SNode t, Diff, e) }
+    | MINUS t = term %prec FMINUS { SNode t }
+    | t = term PLUS e = expr { Node (t, Sum, e) }
+    | t = term MINUS e = expr { Node (t, Diff, e) }
+    | t = term { t }
+  ;
+
+  term:
+    | f = factor TIMES t = term { Node (f, Mult, t)}
+    | f = factor DIV t = term { Node (f, Divis, t) }
+    | f = factor { f }
+  ;
+
+  factor:
+    | LPAREN e = expr RPAREN { e }
+    | n = NUM { Leaf n }
+    | x = VAR { VLeaf x }
+  ;
+#+END_SRC
+
+***** Example of it working
+#+BEGIN_SRC ocaml
+  # let s = "-5 * (2 - 4) * ((3 * 2) + 5)";;
+  val s : string = "-5 * (2 - 4) * ((3 * 2) + 5)"
+  # let e = parse s;;
+  val e : Ast.arithtree =
+    SNode
+     (Node (Leaf 5, Mult,
+       Node (Node (Leaf 2, Diff, Leaf 4), Mult,
+        Node (Node (Leaf 3, Mult, Leaf 2), Sum, Leaf 5))))
+  # eval e;;
+  - : int = 110
+  # pn e; print_endline ""; rpn e; print_endline ""; infix e; print_endline "";;
+   ,* 5 * - 2 4 + * 3 2 5
+   5 2 4 - 3 2 * 5 + * *
+   5 * (2 - 4) * (3 * 2 + 5)
+#+END_SRC
 **** the grammarised version
 Ocaml as a functional language is the real charm. We can in fact mimic
 the AST so well it exactly matches the grammar of ours. Take a look:
@@ -232,77 +304,4 @@ we have evaluation and different notations to choose from.
     5 2 4 - 3 2 * 5 + * *
 #+END_SRC
 we have parsing, evaluation and PN, infix and RPN notations.
-
-**** the simple version
-We can keep everything very simple and design our AST based not on the
-grammar but on our tree diagram from above. Then we need those
-posibilities:
-1. leaves -- the /atoms/ of arithmetic which end the tree. we have
-   two options for those
-   1. leaves carrying a number
-   2. leaves carrying a symbol
-2. the pesky frontal minus as a singular node which just marks that
-   the term should be negated
-3. the basic binary node with children being the operands and an
-   operator in the node
-
-Having considered these points we can make such an AST:
-#+BEGIN_SRC ocaml
-  (* binary operation *)
-  type bop = Sum | Mult | Diff | Divis
-
-  (* the most basic arithemtics tree *)
-  type arithtree =
-    | Leaf of int
-    | VLeaf of string
-    | SNode of arithtree
-    | Node of arithtree * bop * arithtree
-#+END_SRC
-it is much simpler than the ~ocaml_grammary~ version but of course it
-doesn't mimic the grammar but rather the actual arithmetic
-tree. Another minor disadvantage is that we dont have original parentheses
-and structure marked that well.
-
-The lexer.mll file translates the raw text into lexems like ~DIV
-TIMES~ et which are much easy to handle. The [[file:ocaml_simple/parser.mly][parser.mly]] has these productions listed:
-#+BEGIN_SRC ocaml
-  expr:
-    | MINUS t = term PLUS e = expr %prec FMINUS { Node (SNode t, Sum, e) }
-    | MINUS t = term MINUS e = expr %prec FMINUS { Node (SNode t, Diff, e) }
-    | MINUS t = term %prec FMINUS { SNode t }
-    | t = term PLUS e = expr { Node (t, Sum, e) }
-    | t = term MINUS e = expr { Node (t, Diff, e) }
-    | t = term { t }
-  ;
-
-  term:
-    | f = factor TIMES t = term { Node (f, Mult, t)}
-    | f = factor DIV t = term { Node (f, Divis, t) }
-    | f = factor { f }
-  ;
-
-  factor:
-    | LPAREN e = expr RPAREN { e }
-    | n = NUM { Leaf n }
-    | x = VAR { VLeaf x }
-  ;
-#+END_SRC
-
-***** Example of it working
-#+BEGIN_SRC ocaml
-  # let s = "-5 * (2 - 4) * ((3 * 2) + 5)";;
-  val s : string = "-5 * (2 - 4) * ((3 * 2) + 5)"
-  # let e = parse s;;
-  val e : Ast.arithtree =
-    SNode
-     (Node (Leaf 5, Mult,
-       Node (Node (Leaf 2, Diff, Leaf 4), Mult,
-        Node (Node (Leaf 3, Mult, Leaf 2), Sum, Leaf 5))))
-  # eval e;;
-  - : int = 110
-  # pn e; print_endline ""; rpn e; print_endline ""; infix e; print_endline "";;
-   ,* 5 * - 2 4 + * 3 2 5
-   5 2 4 - 3 2 * 5 + * *
-   5 * (2 - 4) * (3 * 2 + 5)
-#+END_SRC
 

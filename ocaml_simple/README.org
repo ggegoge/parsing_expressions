@@ -32,5 +32,8 @@ parser compiled. Or, a longer version without unnecessary warnings, is
 Then execute it with ~./example.byte~.
 
 You can see the makefile for details
+
+todos:
 **** TODO support for parsing from files
+**** TODO exponents (derivatives?)
 perhaps in the future
