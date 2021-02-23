@@ -3,7 +3,7 @@
 In this repository I keep my parsers for simple parsers for basic
 arithemtics on natural numbers. 
 ** Brief overview of the repository
-I have three distinct directories for three distinct-ish here which all differ in some way. 
+I have four distinct directories for three distinct-ish here which all differ in some way. 
 *** Parsers written in C
 Those are in the ~c_*~ directories with appropriate READMEs
 attached. There are two of them but they are quite similar apart from
@@ -17,15 +17,20 @@ captured expression between those two pointers
 This one works in a sequential way -- it keeps only one pointer that
 goes through the expression from right to left and then adds next
 elements recursively (more details below)
-*** The ocaml parser
-In the ~ocaml_parse~ I keep the parser written in ocaml. It works
-similarily to the ~c_seq~ one but is much more /neat/. It depends on
+*** The ocaml parsers
+In the ~ocaml_grammary~ I keep the first ocaml parser I wrote where
+when desinging the AST (term explained below) I have tried to mimic
+the grammar as closely as possible. In ~ocaml_norm~ I have a much more
+normal of a parser in the sense the tree is kept very concise and
+simple.
+
+Both depend on
 the *menhir* library (which I think dates back to *yacc*). 
 ** Usage
 For all parsers the usage (should be) is specified in their
 directories' readmes.
 ** Not as brief of an overview
-*** Parsing arithmetics in general
+*** Parsing arithmetic in general
 With parsing one ought always think of the grammar before actually
 indulging in any coding. Context free grammar is quite cool and lets
 you pretend to be super smart but perhaps a better choice would be to
@@ -46,7 +51,7 @@ instead of ~<a1> <bop> <a2>~. So we first get the element that
 /combines/ the two values and then we recursively get the values
 themselves (perhaps composed of something like that as well). Hence
 one could see that there is a tree-like structure hidden here. The
-leafs are filled with numbers (the atoms of arithmetics) and the nodes
+leafs are filled with numbers (the atoms of arithmetic) and the nodes
 that combine them are the binary operations.
 
 This way we discover the idea of an /abstract syntax tree/ or *AST*
@@ -125,7 +130,8 @@ here we parse the string as it goes
   node *term(char** p);
   node *factor(char** p);
 #+END_SRC
-*** Ocaml parser
+*** Ocaml parsers
+**** the grammarised version
 Ocaml as a functional language is the real charm. We can in fact mimic
 the AST so well it exactly matches the grammar of ours. Take a look:
 #+BEGIN_SRC ocaml
@@ -193,12 +199,12 @@ prove me wrong!). So the proper way to denote it is:
 with the frontal minus being caught by the beggining of the expression
 production. 
 
-So we have ast.ml with the above-shown AST, we have parser.mly with
-the parser and we have a lexer.mll file that changes written text as
+So we have ast.ml with the above-shown AST, we have [[file:ocaml_grammary/parser.mly][parser.mly]] with
+the parser and we have a [[file:ocaml_grammary/lexer.mll][lexer.mll]] file that changes written text as
 ~2 + 3 / 1~ into simple lexemes like ~2 PLUS 3 DIV 1~ etc. In main.ml
 we have evaluation and different notations to choose from. 
 
-**** Example of it working:
+***** Example of it working:
 #+BEGIN_SRC ocaml
   # let s = "-5 * (2 - 4) * ((3 * 2) + 5)";;
   val s : string = "-5 * (2 - 4) * ((3 * 2) + 5)"
@@ -226,3 +232,77 @@ we have evaluation and different notations to choose from.
     5 2 4 - 3 2 * 5 + * *
 #+END_SRC
 we have parsing, evaluation and PN, infix and RPN notations.
+
+**** the simple version
+We can keep everything very simple and design our AST based not on the
+grammar but on our tree diagram from above. Then we need those
+posibilities:
+1. leaves -- the /atoms/ of arithmetic which end the tree. we have
+   two options for those
+   1. leaves carrying a number
+   2. leaves carrying a symbol
+2. the pesky frontal minus as a singular node which just marks that
+   the term should be negated
+3. the basic binary node with children being the operands and an
+   operator in the node
+
+Having considered these points we can make such an AST:
+#+BEGIN_SRC ocaml
+  (* binary operation *)
+  type bop = Sum | Mult | Diff | Divis
+
+  (* the most basic arithemtics tree *)
+  type arithtree =
+    | Leaf of int
+    | VLeaf of string
+    | SNode of arithtree
+    | Node of arithtree * bop * arithtree
+#+END_SRC
+it is much simpler than the ~ocaml_grammary~ version but of course it
+doesn't mimic the grammar but rather the actual arithmetic
+tree. Another minor disadvantage is that we dont have original parentheses
+and structure marked that well.
+
+The lexer.mll file translates the raw text into lexems like ~DIV
+TIMES~ et which are much easy to handle. The [[file:ocaml_simple/parser.mly][parser.mly]] has these productions listed:
+#+BEGIN_SRC ocaml
+  expr:
+    | MINUS t = term PLUS e = expr %prec FMINUS { Node (SNode t, Sum, e) }
+    | MINUS t = term MINUS e = expr %prec FMINUS { Node (SNode t, Diff, e) }
+    | MINUS t = term %prec FMINUS { SNode t }
+    | t = term PLUS e = expr { Node (t, Sum, e) }
+    | t = term MINUS e = expr { Node (t, Diff, e) }
+    | t = term { t }
+  ;
+
+  term:
+    | f = factor TIMES t = term { Node (f, Mult, t)}
+    | f = factor DIV t = term { Node (f, Divis, t) }
+    | f = factor { f }
+  ;
+
+  factor:
+    | LPAREN e = expr RPAREN { e }
+    | n = NUM { Leaf n }
+    | x = VAR { VLeaf x }
+  ;
+#+END_SRC
+
+***** Example of it working
+#+BEGIN_SRC ocaml
+  # let s = "-5 * (2 - 4) * ((3 * 2) + 5)";;
+  val s : string = "-5 * (2 - 4) * ((3 * 2) + 5)"
+  # let e = parse s;;
+  val e : Ast.arithtree =
+    SNode
+     (Node (Leaf 5, Mult,
+       Node (Node (Leaf 2, Diff, Leaf 4), Mult,
+        Node (Node (Leaf 3, Mult, Leaf 2), Sum, Leaf 5))))
+  # eval e;;
+  - : int = 110
+  # pn e; print_endline ""; rpn e; print_endline ""; infix e; print_endline "";;
+   ,* 5 * - 2 4 + * 3 2 5
+   5 2 4 - 3 2 * 5 + * *
+   5 * (2 - 4) * (3 * 2 + 5)
+#+END_SRC
+
