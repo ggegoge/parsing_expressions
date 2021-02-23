@@ -1,6 +1,6 @@
 
 (* binary operation *)
-type bop = Sum | Mult | Diff | Divis
+type bop = Sum | Mult | Diff | Divis | Pow
 
 (* the most basic arithemtics tree *)
 type arithtree =

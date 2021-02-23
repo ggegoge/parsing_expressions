@@ -15,6 +15,7 @@ rule read =
   | "/" { DIV }  
   | "+" { PLUS }
   | "-" { MINUS }
+  | "^" { POW }
   | "(" { LPAREN }
   | ")" { RPAREN }
   | var { VAR (Lexing.lexeme lexbuf) }

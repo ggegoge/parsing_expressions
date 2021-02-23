@@ -8,6 +8,7 @@ open Ast
 %token DIV
 %token PLUS
 %token MINUS
+%token POW
 %token LPAREN
 %token RPAREN
 %token EOF
@@ -27,7 +28,7 @@ prog:
 /* BNF prostej arytmetyki
  * <expr> ::= - <term > + <expr> | <term> + <expr> | <term> - <expr> | <term>
  * <term> ::= <term> * <factor> | factor
- * <factor> = (expr) | num | var */
+ * <factor> = <factor>^<factor> | (expr) | num | var */
 
 
 expr:
@@ -46,6 +47,7 @@ term:
 ;
 
 factor:
+  | f1 = factor POW f2 = factor { Node(f1, Pow, f2) }
   | LPAREN e = expr RPAREN { e }
   | n = NUM { Leaf n }
   | x = VAR { VLeaf x }

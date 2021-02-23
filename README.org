@@ -147,7 +147,7 @@ posibilities:
 Having considered these points we can make such an AST:
 #+BEGIN_SRC ocaml
   (* binary operation *)
-  type bop = Sum | Mult | Diff | Divis
+  type bop = Sum | Mult | Diff | Divis | Pow
 
   (* the most basic arithemtics tree *)
   type arithtree =
@@ -159,7 +159,8 @@ Having considered these points we can make such an AST:
 it is much simpler than the ~ocaml_grammary~ version but of course it
 doesn't mimic the grammar but rather the actual arithmetic
 tree. Another minor disadvantage is that we dont have original parentheses
-and structure marked that well.
+and structure marked that well so adding those parentheses when trying
+to printout an expr infix becomes /quite tricky/.
 
 The lexer.mll file translates the raw text into lexems like ~DIV
 TIMES~ et which are much easy to handle. The [[file:ocaml_simple/parser.mly][parser.mly]] has these productions listed:
