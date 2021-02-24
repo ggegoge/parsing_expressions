@@ -26,23 +26,21 @@ prog:
 ;
 
 /* BNF prostej arytmetyki
- * <expr> ::= - <term > + <expr> | <term> + <expr> | <term> - <expr> | <term>
- * <term> ::= <term> * <factor> | factor
+ * <expr> ::= - <expr> + <term> | <expr> - <term> | <term>
+ * <term> ::= - <term> | <term> * <factor> | <term> / <factor> | <factor>
  * <factor> = <factor>^<factor> | (expr) | num | var */
 
 
 expr:
-  | MINUS t = term PLUS e = expr %prec FMINUS { Node (SNode t, Sum, e) }
-  | MINUS t = term MINUS e = expr %prec FMINUS { Node (SNode t, Diff, e) }
-  | MINUS t = term %prec FMINUS { SNode t }
-  | t = term PLUS e = expr { Node (t, Sum, e) }
-  | t = term MINUS e = expr { Node (t, Diff, e) }
+  | e = expr PLUS t = term { Node (e, Sum, t) }
+  | e = expr MINUS t = term { Node (e, Diff, t) }
   | t = term { t }
 ;
 
 term:
-  | f = factor TIMES t = term { Node (f, Mult, t)}
-  | f = factor DIV t = term { Node (f, Divis, t) }
+  | MINUS t = term %prec FMINUS { SNode t }
+  | t = term TIMES f = factor { Node (t, Mult, f) }
+  | t = term DIV f = factor { Node (t, Divis, f) }
   | f = factor { f }
 ;
 

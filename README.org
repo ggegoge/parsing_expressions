@@ -107,6 +107,15 @@ our grammar accordingly:
   <term> ::= <term> | <factor> * <term> | <factor> / <term>
   <factor> ::= <factor ^ <factor> | (<expr>) | <number> | <variable>
 #+END_EXAMPLE
+
+And actually we have to consider the assosciativity problem. So we
+usually consider minus and division to work like: ~3 - 2 - 1 = (3 - 2) - 1~ 
+so perhaps a better grammar would be:
+#+BEGIN_EXAMPLE
+  <expr> ::= - <expr> + <term> | <expr> - <term> | <term>
+  <term> ::= - <term> | <term> * <factor> | <term> / <factor> | <factor>
+  <factor> = <factor>^<factor> | (expr) | num | var
+#+END_EXAMPLE
 *** C parsers
 We use structs as the data structure letting us maintain these trees.
 #+BEGIN_SRC C
@@ -175,17 +184,15 @@ The lexer.mll file translates the raw text into lexems like ~DIV
 TIMES~ et which are much easy to handle. The [[file:ocaml_simple/parser.mly][parser.mly]] has these productions listed:
 #+BEGIN_SRC ocaml
   expr:
-    | MINUS t = term PLUS e = expr %prec FMINUS { Node (SNode t, Sum, e) }
-    | MINUS t = term MINUS e = expr %prec FMINUS { Node (SNode t, Diff, e) }
-    | MINUS t = term %prec FMINUS { SNode t }
-    | t = term PLUS e = expr { Node (t, Sum, e) }
-    | t = term MINUS e = expr { Node (t, Diff, e) }
+    | e = expr PLUS t = term { Node (e, Sum, t) }
+    | e = expr MINUS t = term { Node (e, Diff, t) }
     | t = term { t }
   ;
 
   term:
-    | f = factor TIMES t = term { Node (f, Mult, t)}
-    | f = factor DIV t = term { Node (f, Divis, t) }
+    | MINUS t = term %prec FMINUS { SNode t }
+    | t = term TIMES f = factor { Node (t, Mult, f) }
+    | t = term DIV f = factor { Node (t, Divis, f) }
     | f = factor { f }
   ;
 

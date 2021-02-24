@@ -114,3 +114,22 @@ let () = Printf.printf "input expr: %s; output:\n" s
 let _ = printxpr infix e
 let _ = printxpr pn e
 let _ = printxpr rpn e
+let () = hr ()
+
+let s = "(3 - 2 - 1) * 121"
+let e = parse s
+let () = Printf.printf "input expr: %s; output:\n" s
+
+let _ = printxpr infix e
+let _ = printxpr pn e
+let _ = printxpr rpn e
+let () = hr ()
+
+let s = "10 / 5 / 2 + 9 / 3 / 3 + 121 / 11 / 11"
+let e = parse s
+let () = Printf.printf "input expr: %s; output:\n" s
+
+let _ = printxpr infix e
+let _ = printxpr pn e
+let _ = printxpr rpn e
+let () = hr ()
